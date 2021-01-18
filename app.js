@@ -1,10 +1,11 @@
+const fs = require('fs');
 const inquirer = require('inquirer');
-const { AnimationFrameScheduler } = require('rxjs/internal/scheduler/AnimationFrameScheduler');
+const generatePage = require('./src/page-template');
 
 const promptUser = () => {
     return inquirer.prompt([
         {
-            type:'input',
+            type: 'input',
             name: 'name',
             message: 'What is your name? (Required)',
             validate: nameInput => {
@@ -20,11 +21,11 @@ const promptUser = () => {
             type: 'input',
             name: 'github',
             message: 'Enter your GitHub Username (Required)',
-            validate: gitHubInput => {
-                if (gitHubInput) {
+            validate: githubInput => {
+                if (githubInput) {
                     return true;
                 } else {
-                    console.log('Please enter your GitHub Username!');
+                    console.log('Please enter your GitHub username!');
                     return false;
                 }
             }
@@ -46,31 +47,34 @@ const promptUser = () => {
                     return false;
                 }
             }
+            // the when code in the 9.4 starter code
+            // when: ({ confirmAbout }) => confirmAbout
         }
     ]);
 };
 
 const promptProject = portfolioData => {
-    //if there's no 'projects' array property, create on
-    if (!portfolioData.projects) {
-        portfolioData.projects=[];
-    }
     console.log(`
-    ===================
+    =================
     Add a New Project
-    ===================
+    =================
     `);
+
+    // If there's no 'projects' array property, create one
+    if (!portfolioData.projects) {
+        portfolioData.projects = [];
+    }
     return inquirer
-    .prompt ([
+    .prompt([
         {
             type: 'input',
             name: 'name',
-            message: 'What is the name of your project (Required)',
-            validate: projectNameInput => {
-                if (projectNameInput) {
+            message: 'What is the name of your project? (Required)',
+            validate: nameInput => {
+                if (nameInput) {
                     return true;
                 } else {
-                    console.log('Please enter your project name!');
+                    console.log('You need to enter a project name!');
                     return false;
                 }
             }
@@ -83,14 +87,14 @@ const promptProject = portfolioData => {
                 if (descriptionInput) {
                     return true;
                 } else {
-                    console.log('Please enter a description of your project!');
+                    console.log('You need to enter a project description!');
                     return false;
                 }
             }
         },
         {
             type: 'checkbox',
-            name: 'langugages',
+            name: 'languages',
             message: 'What did you build this project with? (Check all that apply)',
             choices: ['JavaScript', 'HTML', 'CSS', 'ES6', 'jQuery', 'Bootstrap', 'Node']
         },
@@ -116,8 +120,8 @@ const promptProject = portfolioData => {
         {
             type: 'confirm',
             name: 'confirmAddProject',
-            message: 'Would you like to enter another proejct?',
-            defualt: false
+            message: 'Would you like to enter another project?',
+            default: false
         }
     ])
     .then(projectData => {
@@ -133,20 +137,11 @@ const promptProject = portfolioData => {
 promptUser()
     .then(promptProject)
     .then(portfolioData => {
-        console.log(portfolioData)
+      const pageHTML = generatePage(portfolioData);
+
+    fs.writeFile('./index.html', pageHTML, err => {
+      if (err) throw new Error(err);
+
+      console.log('Page created! Check out index.html in this directory to see it!');
     });
-
-
-
-// const fs = require('fs');
-// const generatePage = require('./src/page-template');
-
-// const pageHTML = generatePage(name, github);
-
-
-
-// fs.writeFile('./index.html', pageHTML, err => {
-//   if (err) throw err;
-
-//   console.log('Portfolio complete! Check out index.html to see the output!');
-// });
+    });
